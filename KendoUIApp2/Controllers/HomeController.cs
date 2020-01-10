@@ -15,6 +15,7 @@ namespace KendoUIApp2.Controllers
         private TaskContext _db = new TaskContext();
 
         public ActionResult Tasks()
+
         {
             ViewBag.Message = "Welcome to ASP.NET MVC!";
 
