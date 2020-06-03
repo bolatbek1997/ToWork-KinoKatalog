@@ -17,12 +17,30 @@
 <body>
     <header>
         <div class="align-content-md-start col-md-12">
-         
+
             <div class="float-left">
                 <nav>
                     <ul id="menu">
                         <li>@Html.ActionLink("Home", "Tasks", "Home")</li>
                     </ul>
+
+                </nav>
+            </div>
+            <div class="float-right">
+                <nav>
+                    <ul id="menu">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li>@Html.ActionLink("Login", "FormLogin", "Auth")</li>
+                            <li>@Html.ActionLink("LogOut", "LogOut", "Auth")</li>
+                        }
+                        else
+                        {
+                            <li>@Html.ActionLink("Login", "FormLogin", "Auth")</li>
+                            <li>@Html.ActionLink("SignIn", "FormLogin", "Auth",new {str="signin"},htmlAttributes: null)</li>
+                        }
+                    </ul>
+
                 </nav>
             </div>
 

@@ -6,27 +6,74 @@ using Kendo.Mvc.Extensions;
 using KendoUIApp2.Models;
 using System.Threading.Tasks;
 using System.Data.Entity;
+using System.Web;
+using System.IO;
+using KendoUIApp2.Authorize;
 
 namespace KendoUIApp2.Controllers
 {
-    public class HomeController : Controller
+    [UserAuthorize]
+    public class HomeController : BaseController
     {
 
-        private TaskContext _db = new TaskContext();
+        private FilmContext _db = new FilmContext();
 
         public ActionResult Tasks()
-
         {
+            var model = user;
             ViewBag.Message = "Welcome to ASP.NET MVC!";
 
             return View();
         }
-        public async Task<ActionResult> GridAsync([DataSourceRequest] DataSourceRequest request)
+         
+        public async Task<ActionResult> AddFilmAsync(int? id)
+        { 
+            ViewBag.Message = "Welcome to ASP.NET MVC!";
+            if (id != null) {
+                var model = await _db.Films.FirstOrDefaultAsync(x => x.Id == id);
+                View(model);
+            }
+            return View();
+        }
+        [HttpPost]
+        public async Task<ActionResult> AddFilmAsync(Film model)
         {
-            var list = new List<Tasks>();
+            HttpPostedFileBase file = Request.Files["ImageData"];
+            model.Poster = ConvertToBytes(file);
+            if (model != null && ModelState.IsValid)
+            {
+                try
+                {
+                    var film = await _db.Films.FirstOrDefaultAsync(x => x.Id == model.Id);
+                    if (film != null) {
+                        film.Name = model.Name;
+                        film.Poster = model.Poster;
+                        film.Producer = model.Producer;
+                        film.Year = model.Year;
+                        film.UserId = user.Id;
+                        film.User = user;
+                    }
+                    _db.Films.Add(model);
+                    _db.SaveChanges();
+                }
+                catch (Exception e)
+                {
+
+                    throw e;
+                }
+            }
+                ViewBag.Message = "Welcome to ASP.NET MVC!";
+           
+
+            return View();
+        }
+
+        public async Task<ActionResult> FilmGridAsync([DataSourceRequest] DataSourceRequest request)
+        {
+            var list = new List<Film>();
             try
             {
-                list = await _db.Tasks.ToListAsync();
+                list = await _db.Films.ToListAsync();
                 return Json(await list.ToDataSourceResultAsync(request));
             }
             catch (Exception e)
@@ -34,7 +81,7 @@ namespace KendoUIApp2.Controllers
                 return Json(await list.ToDataSourceResultAsync(request));
                 throw e;
             }
-           
+
         }
         [AcceptVerbs(HttpVerbs.Post)]
         public async Task<ActionResult> Create([DataSourceRequest] DataSourceRequest request, Tasks model)
@@ -98,6 +145,22 @@ namespace KendoUIApp2.Controllers
 
             return Json(new[] { model }.ToDataSourceResult(request, ModelState)); ;
         }
-                                    
+
+        public async Task<ActionResult> RenderImage(Guid id)
+        {
+            var item = await _db.Films.FindAsync(id);
+
+            byte[] photoBack = item.Poster;
+
+            return File(photoBack, "image/png");
+        }
+        private byte[] ConvertToBytes(HttpPostedFileBase image)
+        {
+            byte[] imageBytes = null;
+            BinaryReader reader = new BinaryReader(image.InputStream);
+            imageBytes = reader.ReadBytes((int)image.ContentLength);
+            return imageBytes;
+        }
+
     }
 }

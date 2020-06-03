@@ -1,0 +1,50 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section featured {
+
+    <div class="justify-content-around">
+        <div style="padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    background-color: #7ac0da;
+    border-radius: 0.3rem;">
+            <hgroup class="site-title">
+                <span style="color:black">Задачи</span>
+
+
+
+            </hgroup>
+        </div>
+    </div>
+}
+<div id="ajaxDivAuthFormLogin">
+    @model KendoUIApp2.Models.UserModel
+
+    <div class="auth">
+        @using (Ajax.BeginForm( ViewBag.SignIn?"SignIn":"FormLogin", "Auth", new { area = "" }, new AjaxOptions { UpdateTargetId = "ajaxDivAuthFormLogin", LoadingElementId = "", OnBegin = "showLoader()" }, new { id = "ajaxFormAuthFormLogin" }))
+        {
+            @Html.AntiForgeryToken()
+            <label>
+                <p>Login:</p>
+                @Html.TextBoxFor(m => m.Login, new { @id = "FormLogin_Login", @placeholder = "", @autocomplete = "off" })
+            </label>
+            <label style="margin: 0 0 20px 0;">
+                <p>Password:</p>
+                @Html.PasswordFor(m => m.Password, new { @id = "FormLogin_Password", @placeholder = "" })
+            </label>
+
+
+            <button type="submit">submit</button>
+        }
+    </div>
+
+
+</div>
+<script>
+
+    $(document).ready(function () {
+        hideLoader();
+        $("#FormLogin_Login").mask("999999999999");
+    });
+</script>
